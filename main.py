@@ -36,15 +36,32 @@ def do_check():
         raise BadResponseError
     pq = pyquery.PyQuery(r.content)
     tables = pq.find('.calendar-month-table table')
-    available_dates = tables.find('td.buchbar')
+    december_table = None
+    for table in tables:
+        _t = pyquery.PyQuery(table)
+        month_name = _t.find('thead th.month').text().strip()
+        if month_name.startswith('Dezember'):
+            december_table = _t
+            break
+    available_dates = december_table.find('td.buchbar')
     if available_dates.length:
-        play_success()
+        filtered_dates = []
+        for a_date in available_dates:
+            day = pyquery.PyQuery(a_date).text()
+            day = int(day)
+            if day not in (28, 29, 30):
+                filtered_dates.append(day)
+        if filtered_dates:
+            play_success()
+            print(*filtered_dates, sep='\n')
+        else:
+            print('No dates, skipping')
     else:
         print('No dates, skipping')
 
 
 def get_delay():
-    return random.randint(100, 300)
+    return random.randint(60, 200)
 
 
 def main():
