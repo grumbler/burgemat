@@ -6,6 +6,7 @@ from __future__ import (
 )
 
 import os
+import platform
 import random
 import time
 
@@ -19,12 +20,28 @@ class BadResponseError(Exception):
     pass
 
 
-def play_success():
+def play_success_linux():
     os.system('paplay {}'.format(SUCCESS_SOUND))
 
 
-def play_error():
+def play_error_linux():
     os.system('paplay {}'.format(ERROR_SOUND))
+
+
+def play_success_mac():
+    os.system('afplay {}'.format(SUCCESS_SOUND))
+
+
+def play_error_mac():
+    os.system('afplay {}'.format(ERROR_SOUND))
+
+
+if platform.system() == 'Darwin':
+    play_success = play_success_mac
+    play_error = play_error_mac
+else:
+    play_success = play_success_linux
+    play_error = play_error_linux
 
 
 def do_check():
@@ -36,21 +53,21 @@ def do_check():
         raise BadResponseError
     pq = pyquery.PyQuery(r.content)
     tables = pq.find('.calendar-month-table table')
-    december_table = None
+    this_month_table = None
     for table in tables:
         _t = pyquery.PyQuery(table)
         month_name = _t.find('thead th.month').text().strip()
-        if month_name.startswith('Dezember'):
-            december_table = _t
+        if month_name.startswith('Februar'):
+            this_month_table = _t
             break
-    available_dates = december_table.find('td.buchbar')
+    available_dates = this_month_table.find('td.buchbar')
     if available_dates.length:
         filtered_dates = []
         for a_date in available_dates:
             day = pyquery.PyQuery(a_date).text()
             day = int(day)
-            if day not in (28, 29, 30):
-                filtered_dates.append(day)
+            # if day not in (28, 29, 30):
+            filtered_dates.append(day)
         if filtered_dates:
             play_success()
             print(*filtered_dates, sep='\n')
