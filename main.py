@@ -57,10 +57,11 @@ def do_check():
     for table in tables:
         _t = pyquery.PyQuery(table)
         month_name = _t.find('thead th.month').text().strip()
-        if month_name.startswith('Februar'):
+        if month_name.startswith('März'):
+            print("Found maonth table")
             this_month_table = _t
             break
-    available_dates = this_month_table.find('td.buchbar')
+    available_dates = tables.find('td.buchbar')
     if available_dates.length:
         filtered_dates = []
         for a_date in available_dates:
